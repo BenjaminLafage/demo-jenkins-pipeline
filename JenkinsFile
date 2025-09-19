@@ -1,42 +1,38 @@
 pipeline {
     agent {
-        dockerContainer {
-            image 'node:current-trixie'
+        docker {
+            image 'node:18-alpine'
         }
     }
     stages {
         stage('Clone repo') {
             steps {
-                checkout scm
+                git url : 'https://github.com/BenjaminLafage/demo-jenkins-pipeline.git', branch: 'main'
                 echo "Clone du depot"
             }
         }
         stage('Build') {
             steps {
                 echo "Build en cours ..."
-                sh 'npm install'
+                sh 'npm ci'
             }
         }
         stage('Test') {
             steps {
-                sh 'npm run test'
+                sh 'npm test'
+                junit 'test.xml'
             }
         }
     }
     post {
         always {
-            publishTestResults testResultsPattern: 'reports/*.xml'
+            echo 'Fin du pipeline'
         }
         success {
-
             echo 'Pipeline réussi !'
-
         }
-
         failure {
-
             echo 'Pipeline échoué !'
-
         }
     }
 }
