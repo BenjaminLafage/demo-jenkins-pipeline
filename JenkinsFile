@@ -1,13 +1,13 @@
 pipeline {
     agent {
-        docker {
+        dockerContainer {
             image 'node:latest'
         }
     }
     stages {
         stage('Clone repo') {
             steps {
-                sh 'git clone https://github.com/BenjaminLafage/demo-jenkins-pipeline.git'
+                checkout scm
                 echo "Clone du depot"
             }
         }
@@ -20,15 +20,13 @@ pipeline {
         stage('Test') {
             steps {
                 sh 'npm run test'
-                post {
-                    always {
-                        junit 'reports/*.xml'
-                    }
-                }
             }
         }
     }
     post {
+        always {
+            publishTestResults testResultsPattern: 'reports/*.xml'
+        }
         success {
 
             echo 'Pipeline réussi !'
